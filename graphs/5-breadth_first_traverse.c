@@ -2,20 +2,6 @@
 #include "graphs.h"
 
 /**
- * struct queue_node_s - Node in a BFS queue
- *
- * @v: Pointer to the vertex
- * @depth: Depth of the vertex from the start
- * @next: Pointer to the next node in the queue
- */
-typedef struct queue_node_s
-{
-	const vertex_t		*v;
-	size_t			depth;
-	struct queue_node_s	*next;
-} queue_node_t;
-
-/**
  * enqueue - Adds a vertex to the tail of the queue
  *
  * @head: Pointer to the head of the queue
@@ -45,6 +31,42 @@ static int enqueue(queue_node_t **head, queue_node_t **tail,
 }
 
 /**
+ * process_node - Dequeues a node, calls action, enqueues unvisited neighbors
+ *
+ * @head: Pointer to the head of the queue
+ * @tail: Pointer to the tail of the queue
+ * @visited: Array tracking visited vertex indices
+ * @action: Function to call on each visited vertex
+ * @max_depth: Pointer to the maximum depth reached
+ */
+static void process_node(queue_node_t **head, queue_node_t **tail,
+		char *visited, void (*action)(const vertex_t *, size_t),
+		size_t *max_depth)
+{
+	queue_node_t *tmp;
+	edge_t *edge;
+
+	tmp = *head;
+	*head = (*head)->next;
+	if (!*head)
+		*tail = NULL;
+	action(tmp->v, tmp->depth);
+	if (tmp->depth > *max_depth)
+		*max_depth = tmp->depth;
+	edge = tmp->v->edges;
+	while (edge)
+	{
+		if (!visited[edge->dest->index])
+		{
+			visited[edge->dest->index] = 1;
+			enqueue(head, tail, edge->dest, tmp->depth + 1);
+		}
+		edge = edge->next;
+	}
+	free(tmp);
+}
+
+/**
  * breadth_first_traverse - Traverses a graph using breadth-first algorithm
  *
  * @graph: Pointer to the graph to traverse
@@ -55,10 +77,9 @@ static int enqueue(queue_node_t **head, queue_node_t **tail,
 size_t breadth_first_traverse(const graph_t *graph,
 		void (*action)(const vertex_t *v, size_t depth))
 {
-	queue_node_t *head, *tail, *tmp;
+	queue_node_t *head, *tail;
 	char *visited;
 	size_t max_depth;
-	edge_t *edge;
 
 	if (!graph || !action || !graph->vertices)
 		return (0);
@@ -74,27 +95,7 @@ size_t breadth_first_traverse(const graph_t *graph,
 	}
 	visited[graph->vertices->index] = 1;
 	while (head)
-	{
-		tmp = head;
-		head = head->next;
-		if (!head)
-			tail = NULL;
-		action(tmp->v, tmp->depth);
-		if (tmp->depth > max_depth)
-			max_depth = tmp->depth;
-		edge = tmp->v->edges;
-		while (edge)
-		{
-			if (!visited[edge->dest->index])
-			{
-				visited[edge->dest->index] = 1;
-				enqueue(&head, &tail, edge->dest,
-					tmp->depth + 1);
-			}
-			edge = edge->next;
-		}
-		free(tmp);
-	}
+		process_node(&head, &tail, visited, action, &max_depth);
 	free(visited);
 	return (max_depth);
 }
