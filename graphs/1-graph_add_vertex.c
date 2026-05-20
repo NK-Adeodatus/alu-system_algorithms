@@ -3,6 +3,29 @@
 #include "graphs.h"
 
 /**
+ * append_vertex - Appends a new vertex to the end of the adjacency list
+ *
+ * @graph: Pointer to the graph
+ * @new_vertex: Pointer to the vertex to append
+ */
+static void append_vertex(graph_t *graph, vertex_t *new_vertex)
+{
+	vertex_t *current;
+
+	if (!graph->vertices)
+	{
+		new_vertex->index = 0;
+		graph->vertices = new_vertex;
+		return;
+	}
+	current = graph->vertices;
+	while (current->next)
+		current = current->next;
+	new_vertex->index = current->index + 1;
+	current->next = new_vertex;
+}
+
+/**
  * graph_add_vertex - Adds a vertex to an existing graph
  *
  * @graph: Pointer to the graph to add the vertex to
@@ -17,7 +40,6 @@ vertex_t *graph_add_vertex(graph_t *graph, const char *str)
 
 	if (!graph || !str)
 		return (NULL);
-
 	current = graph->vertices;
 	while (current)
 	{
@@ -25,38 +47,20 @@ vertex_t *graph_add_vertex(graph_t *graph, const char *str)
 			return (NULL);
 		current = current->next;
 	}
-
 	new_vertex = malloc(sizeof(vertex_t));
 	if (!new_vertex)
 		return (NULL);
-
 	content = strdup(str);
 	if (!content)
 	{
 		free(new_vertex);
 		return (NULL);
 	}
-
 	new_vertex->content = content;
 	new_vertex->nb_edges = 0;
 	new_vertex->edges = NULL;
 	new_vertex->next = NULL;
-
-	if (!graph->vertices)
-	{
-		new_vertex->index = 0;
-		graph->vertices = new_vertex;
-	}
-	else
-	{
-		current = graph->vertices;
-		while (current->next)
-			current = current->next;
-		new_vertex->index = current->index + 1;
-		current->next = new_vertex;
-	}
-
+	append_vertex(graph, new_vertex);
 	graph->nb_vertices++;
-
 	return (new_vertex);
 }
