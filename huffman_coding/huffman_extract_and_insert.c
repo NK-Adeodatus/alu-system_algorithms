@@ -10,7 +10,7 @@
  * Return: Pointer to the new parent nested node, or NULL on failure
  */
 static binary_tree_node_t *create_parent(binary_tree_node_t *left,
-	binary_tree_node_t *right)
+	binary_tree_node_t *right, size_t index)
 {
 	symbol_t *sym_left, *sym_right, *sym_parent;
 	binary_tree_node_t *parent;
@@ -35,6 +35,7 @@ static binary_tree_node_t *create_parent(binary_tree_node_t *left,
 	parent->right = right;
 	left->parent = parent;
 	right->parent = parent;
+	parent->parent = (binary_tree_node_t *)(long)index;
 
 	return (parent);
 }
@@ -62,7 +63,7 @@ int huffman_extract_and_insert(heap_t *priority_queue)
 	if (right == NULL)
 		return (0);
 
-	parent = create_parent(left, right);
+	parent = create_parent(left, right, priority_queue->size);
 	if (parent == NULL)
 		return (0);
 
