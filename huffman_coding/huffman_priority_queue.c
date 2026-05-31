@@ -7,19 +7,28 @@
  * @p1: Pointer to first binary_tree_node_t (contains symbol_t *)
  * @p2: Pointer to second binary_tree_node_t (contains symbol_t *)
  *
- * Return: Difference between the two frequencies
+ * Return: Difference between the two frequencies, or pointer diff if equal
  */
 static int symbol_cmp(void *p1, void *p2)
 {
 	binary_tree_node_t *n1, *n2;
 	symbol_t *s1, *s2;
+	int diff;
 
 	n1 = (binary_tree_node_t *)p1;
 	n2 = (binary_tree_node_t *)p2;
 	s1 = (symbol_t *)n1->data;
 	s2 = (symbol_t *)n2->data;
 
-	return ((int)(s1->freq) - (int)(s2->freq));
+	diff = (int)(s1->freq) - (int)(s2->freq);
+	if (diff != 0)
+		return (diff);
+
+	if (n1 < n2)
+		return (-1);
+	if (n1 > n2)
+		return (1);
+	return (0);
 }
 
 /**
