@@ -24,11 +24,7 @@ static int symbol_cmp(void *p1, void *p2)
 	if (diff != 0)
 		return (diff);
 
-	if (n1 < n2)
-		return (-1);
-	if (n1 > n2)
-		return (1);
-	return (0);
+	return ((int)(unsigned char)s1->data - (int)(unsigned char)s2->data);
 }
 
 /**
