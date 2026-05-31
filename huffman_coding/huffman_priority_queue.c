@@ -7,7 +7,8 @@
  * @p1: Pointer to first binary_tree_node_t (contains symbol_t *)
  * @p2: Pointer to second binary_tree_node_t (contains symbol_t *)
  *
- * Return: Difference between the two frequencies, or pointer diff if equal
+ * Return: Difference between frequencies; insertion order if equal
+ * Note: parent pointer of nested node is repurposed to store insert index
  */
 static int symbol_cmp(void *p1, void *p2)
 {
@@ -24,7 +25,7 @@ static int symbol_cmp(void *p1, void *p2)
 	if (diff != 0)
 		return (diff);
 
-	return ((int)(unsigned char)s1->data - (int)(unsigned char)s2->data);
+	return ((long)n1->parent - (long)n2->parent);
 }
 
 /**
@@ -66,6 +67,8 @@ heap_t *huffman_priority_queue(char *data, size_t *freq, size_t size)
 			heap_delete(heap, free);
 			return (NULL);
 		}
+
+		nested->parent = (binary_tree_node_t *)(long)i;
 
 		if (heap_insert(heap, nested) == NULL)
 		{
