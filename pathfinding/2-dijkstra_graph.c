@@ -61,6 +61,23 @@ static size_t min_unvisited(size_t *dist, char *visited, size_t n)
 }
 
 /**
+ * free_arrays - Frees all Dijkstra working arrays
+ *
+ * @verts: vertex pointer array
+ * @dist: distance array
+ * @prev: predecessor array
+ * @visited: visited flags array
+ */
+static void free_arrays(vertex_t **verts, size_t *dist,
+		int *prev, char *visited)
+{
+	free(verts);
+	free(dist);
+	free(prev);
+	free(visited);
+}
+
+/**
  * init_arrays - Allocates and initialises Dijkstra working arrays
  *
  * @graph: pointer to the graph
@@ -84,7 +101,7 @@ static int init_arrays(graph_t *graph, vertex_t ***verts,
 	*visited = calloc(n, sizeof(**visited));
 	if (!*verts || !*dist || !*prev || !*visited)
 	{
-		free(*verts); free(*dist); free(*prev); free(*visited);
+		free_arrays(*verts, *dist, *prev, *visited);
 		return (-1);
 	}
 	for (v = graph->vertices, i = 0; v; v = v->next, i++)
@@ -141,6 +158,6 @@ queue_t *dijkstra_graph(graph_t *graph, vertex_t const *start,
 	}
 	path = visited[target->index] ?
 		build_path(verts, prev, target->index) : NULL;
-	free(dist); free(prev); free(visited); free(verts);
+	free_arrays(verts, dist, prev, visited);
 	return (path);
 }
