@@ -3,6 +3,51 @@
 #include "pathfinding.h"
 
 /**
+ * free_visited - Frees a 2D visited grid
+ *
+ * @visited: pointer to the grid
+ * @rows: number of rows
+ */
+static void free_visited(char **visited, int rows)
+{
+	int i;
+
+	for (i = 0; i < rows; i++)
+		free(visited[i]);
+	free(visited);
+}
+
+/**
+ * alloc_visited - Allocates a zeroed 2D visited grid
+ *
+ * @rows: number of rows
+ * @cols: number of columns
+ *
+ * Return: allocated grid, or NULL on failure
+ */
+static char **alloc_visited(int rows, int cols)
+{
+	char **visited;
+	int i;
+
+	visited = calloc(rows, sizeof(*visited));
+	if (!visited)
+		return (NULL);
+	for (i = 0; i < rows; i++)
+	{
+		visited[i] = calloc(cols, sizeof(**visited));
+		if (!visited[i])
+		{
+			while (--i >= 0)
+				free(visited[i]);
+			free(visited);
+			return (NULL);
+		}
+	}
+	return (visited);
+}
+
+/**
  * bt_recurse - Recursive helper for backtracking path search
  *
  * @map: 2D array map (read-only)
@@ -73,44 +118,26 @@ queue_t *backtracking_array(char **map, int rows, int cols,
 {
 	char **visited;
 	queue_t *path;
-	int i;
 
-	visited = calloc(rows, sizeof(*visited));
+	visited = alloc_visited(rows, cols);
 	if (!visited)
 		return (NULL);
-	for (i = 0; i < rows; i++)
-	{
-		visited[i] = calloc(cols, sizeof(**visited));
-		if (!visited[i])
-		{
-			while (--i >= 0)
-				free(visited[i]);
-			free(visited);
-			return (NULL);
-		}
-	}
 
 	path = queue_create();
 	if (!path)
 	{
-		for (i = 0; i < rows; i++)
-			free(visited[i]);
-		free(visited);
+		free_visited(visited, rows);
 		return (NULL);
 	}
 
 	if (!bt_recurse(map, visited, rows, cols,
 			start->x, start->y, target, path))
 	{
-		for (i = 0; i < rows; i++)
-			free(visited[i]);
-		free(visited);
+		free_visited(visited, rows);
 		free(path);
 		return (NULL);
 	}
 
-	for (i = 0; i < rows; i++)
-		free(visited[i]);
-	free(visited);
+	free_visited(visited, rows);
 	return (path);
 }
